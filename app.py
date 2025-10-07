@@ -5,27 +5,22 @@ import numpy as np
 from PIL import Image
 import time
 
-model = YOLO("best (3).onnx")
+model = YOLO('best (3).onnx', task='detect')
 
-st.title("📹 YOLO Live Inference (Web-Friendly)")
+st.title('YOLO ONNX Live Inference')
 
-frame_placeholder = st.empty()
+run = st.checkbox('Run Inference')
+FRAME_WINDOW = st.image([])
 
-run = st.checkbox("Run live detection")
-
-while run:
-    img_file = st.camera_input("Camera feed", key=time.time())
-
-    if img_file is not None:
-        image = Image.open(img_file)
+if run:
+    camera = st.camera_input("Camera", key=f"camera_{time.time()}")
+    if camera:
+        image = Image.open(camera)
         frame = np.array(image)
-
+        frame = cv2.cvtColor(frame, cv2.COLOR_RGB2BGR)
+        
         results = model(frame)
         annotated_frame = results[0].plot()
-
-        frame_placeholder.image(annotated_frame, channels="BGR", use_column_width=True)
-    else:
-        st.warning("Waiting for camera input...")
-
-    # Control refresh rate
-    time.sleep(1)
+        
+        FRAME_WINDOW.image(annotated_frame, channels="BGR")
+        st.rerun()  # Refresh for next frame
