@@ -1,28 +1,31 @@
 from ultralytics import YOLO
 import streamlit as st
 import cv2
+import numpy as np
+from PIL import Image
+import time
 
-# Load your exported ONNX model
-model = YOLO('best (3).onnx', task='detect')
+model = YOLO("best (3).onnx")
 
-st.title('YOLO ONNX Live Inference')
-run = st.checkbox('Run Inference')
-FRAME_WINDOW = st.image([])
+st.title("📹 YOLO Live Inference (Web-Friendly)")
 
-cap = cv2.VideoCapture(0)  # Use 0 for webcam
+frame_placeholder = st.empty()
+
+run = st.checkbox("Run live detection")
 
 while run:
-    ret, frame = cap.read()
-    if not ret:
-        st.write("Failed to capture image from camera.")
-        break
-    
-    # Run inference on the frame
-    results = model(frame)
-    annotated_frame = results[0].plot()
-    
-    # Display the annotated frame
-    FRAME_WINDOW.image(annotated_frame, channels="BGR")
+    img_file = st.camera_input("Camera feed", key=time.time())
 
-cap.release()
-st.write('Inference stopped.')
+    if img_file is not None:
+        image = Image.open(img_file)
+        frame = np.array(image)
+
+        results = model(frame)
+        annotated_frame = results[0].plot()
+
+        frame_placeholder.image(annotated_frame, channels="BGR", use_column_width=True)
+    else:
+        st.warning("Waiting for camera input...")
+
+    # Control refresh rate
+    time.sleep(1)
