@@ -3,7 +3,7 @@ import streamlit as st
 import cv2
 
 # Load your exported ONNX model
-model = YOLO('best (7).pt', task='detect')
+model = YOLO('best (3).onnx', task='detect')
 
 st.title('YOLO ONNX Live Inference')
 run = st.checkbox('Run Inference')
